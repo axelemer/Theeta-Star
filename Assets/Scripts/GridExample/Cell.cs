@@ -10,6 +10,7 @@ public class Cell : MonoBehaviour
     public event Action<Cell> OnSelect = delegate { };
 
     public Vector2Int pos;//Posicion en la grilla
+    public float floorOffset;
 
     public Color defaultColor = Color.white;
     public Color untransitableColor = Color.black;
@@ -17,12 +18,16 @@ public class Cell : MonoBehaviour
     private bool transitable = true;
     private int cost = 1;
 
+
     private MeshRenderer rend;
     private Text costText;
     private Collider2D coll;
 
+    public LayerMask blockMask;
+
     private int transitableLayer = 8;
     private int blockedLayer = 9;
+    private int floorLayer = 1 << 10;
 
     public bool Transitable
     {
@@ -59,14 +64,37 @@ public class Cell : MonoBehaviour
         rend = GetComponentInChildren<MeshRenderer>();
         costText = GetComponentInChildren<Text>();
         coll = GetComponent<Collider2D>();
+    }
+
+    private void Start()
+    {
         Reset();
+
+    }
+
+    public void SetPosition()
+    {
+        RaycastHit hit;
+        Vector3 pos = transform.localPosition + Vector3.up * 10;
+        Vector3 dir = (transform.localPosition - Vector3.up * 50) - transform.localPosition;
+        Debug.DrawRay(pos, dir, Color.green, 3, false);
+        if (Physics.Raycast(pos, dir, out hit, Mathf.Infinity, floorLayer, QueryTriggerInteraction.Collide))
+        {
+            transform.position = hit.point + (Vector3.up * floorOffset);
+        }
     }
 
     public void Reset()
     {
         Cost = 1;
-        Transitable = true;
-        SetColor(defaultColor);
+        Transitable = DefineTransitable();
+        SetColor(Transitable ? defaultColor : untransitableColor);
+    }
+
+    private bool DefineTransitable()
+    {
+        var hitResult = Physics.CheckSphere(transform.position, 1f, blockMask);
+        return !hitResult;
     }
 
     public void SetColor(Color color)

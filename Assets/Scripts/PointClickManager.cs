@@ -23,7 +23,6 @@ public class PointClickManager : MonoBehaviour
 
     void Clicked()
     {
-        print("Click");
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hit = new RaycastHit();

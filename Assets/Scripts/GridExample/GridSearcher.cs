@@ -11,7 +11,7 @@ public class GridSearcher : MonoBehaviour
     public enum MovementType { Straight, StraightDiagonal }
     public MovementType movementType;
 
-    public Frame grid;//Referencia a la grilla
+    public GridMaker grid;//Referencia a la grilla
 
     public float heuristicMultiplier = 1f;
 
@@ -188,9 +188,10 @@ public class GridSearcher : MonoBehaviour
     {
         var start = a.transform.position;
         var dir = (b.transform.position - a.transform.position).normalized;
-        var dist = Vector2.Distance(b.transform.position, a.transform.position);
-        var hit = Physics2D.CircleCast(a.transform.position, 0.45f, dir, dist, blockedMask);
-        return hit.collider == null;
+        var dist = Vector3.Distance(b.transform.position, a.transform.position);
+        RaycastHit h;
+        var hit = Physics.SphereCast(a.transform.position, 1f, dir, out h, dist, blockedMask);
+        return hit;
     }
 
     private bool InBounds(Vector2Int pos)

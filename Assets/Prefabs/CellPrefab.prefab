@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4079800262441354}
   - component: {fileID: 114661398861648780}
   - component: {fileID: 6176097579595896008}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: CellPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,8 +47,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pos: {x: 0, y: 0}
+  floorOffset: 0.5
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
   untransitableColor: {r: 0, g: 0, b: 0, a: 1}
+  blockMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!135 &6176097579595896008
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -60,7 +64,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.95
+  m_Radius: 0.34
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1536393671227240
 GameObject:
@@ -74,7 +78,7 @@ GameObject:
   - component: {fileID: 223590488275420184}
   - component: {fileID: 114947527140248298}
   - component: {fileID: 114032600136025556}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -172,7 +176,7 @@ GameObject:
   - component: {fileID: 224518478890087318}
   - component: {fileID: 222153236375845504}
   - component: {fileID: 114272906693637510}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: CostText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,7 +255,7 @@ GameObject:
   - component: {fileID: 5121728084591518332}
   - component: {fileID: 4161479708431338405}
   - component: {fileID: 8555961274957567515}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
