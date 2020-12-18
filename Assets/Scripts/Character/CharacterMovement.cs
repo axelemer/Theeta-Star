@@ -8,6 +8,7 @@ public class CharacterMovement : MonoBehaviour
     public float speed;
     public float rotationSpeed;
     public float stopDistance;
+    public bool useStopDistance;
     private Vector3 pointToGo;
 
     private void Start()
@@ -17,7 +18,14 @@ public class CharacterMovement : MonoBehaviour
 
     private void Update()
     {
-        if (Vector3.Distance(transform.position, this.pointToGo) > stopDistance)
+        if (useStopDistance)
+        {
+            if (Vector3.Distance(transform.position, this.pointToGo) > stopDistance)
+            {
+                Move();
+            }
+        }
+        else
         {
             Move();
         }

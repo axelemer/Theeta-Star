@@ -32,12 +32,12 @@ public class GridSearcher : MonoBehaviour
 
     public LayerMask blockedMask;
 
-    private Cell start;//Nodo inicial
-    private Cell end;//Nodo final
+    internal Cell start;//Nodo inicial
+    internal Cell end;//Nodo final
 
     private List<Vector2Int> straightDirs = new List<Vector2Int>();
     private List<Vector2Int> diagonalDirs = new List<Vector2Int>();
-    private List<Cell> path = new List<Cell>();
+    internal List<Cell> path = new List<Cell>();
 
     #region Debug
     public Color startColor = Color.cyan;
@@ -76,19 +76,19 @@ public class GridSearcher : MonoBehaviour
 
     private void OnCellSelected(Cell cell)
     {
-        if (!cell.Transitable) return;//Si la celda esta bloqueada no hacemos nada
+        //if (!cell.Transitable) return;//Si la celda esta bloqueada no hacemos nada
 
-        ClearAll();//Debug - limpia el color de todas las celdas
+        //ClearAll();//Debug - limpia el color de todas las celdas
 
-        start = end;//Nuestra celda inicial va a ser la que antes era la final
-        end = cell;//Y la celda final va a ser la que estemos seleccionando ahora
+        //start = end;//Nuestra celda inicial va a ser la que antes era la final
+        //end = cell;//Y la celda final va a ser la que estemos seleccionando ahora
 
-        //Debug - Le seteamos los colores correspondientes al inicio y al fin
-        if (start) start.SetColor(startColor);
-        if (end) end.SetColor(endColor);
+        ////Debug - Le seteamos los colores correspondientes al inicio y al fin
+        //if (start) start.SetColor(startColor);
+        //if (end) end.SetColor(endColor);
 
-        if (end && start)//Si ninguna de los dos es null
-            Search();//Ejecutamos la busqueda
+        //if (end && start)//Si ninguna de los dos es null
+        //    Search();//Ejecutamos la busqueda
     }
 
 
@@ -190,8 +190,8 @@ public class GridSearcher : MonoBehaviour
         var dir = (b.transform.position - a.transform.position).normalized;
         var dist = Vector3.Distance(b.transform.position, a.transform.position);
         RaycastHit h;
-        var hit = Physics.SphereCast(a.transform.position, 1f, dir, out h, dist, blockedMask);
-        return hit;
+        var hit = Physics.SphereCast(a.transform.position, 0.5f, dir, out h, dist, blockedMask);
+        return !hit;
     }
 
     private bool InBounds(Vector2Int pos)
@@ -201,7 +201,7 @@ public class GridSearcher : MonoBehaviour
     }
 
     //Debug
-    private void ClearAll()
+    internal void ClearAll()
     {
         StopAllCoroutines();//Detenemos la corrutina de pintado
         lineRenderer.positionCount = 0;
