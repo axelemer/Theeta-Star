@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[ExecuteInEditMode][Serializable]
 public class Cell : MonoBehaviour
 {
     //Evento al seleccionar
@@ -12,14 +13,15 @@ public class Cell : MonoBehaviour
     public Vector2Int pos;//Posicion en la grilla
     public float floorOffset;
 
+    public Color transaprent = new Color(0, 0, 0, 0);
     public Color defaultColor = Color.white;
     public Color untransitableColor = Color.black;
 
     private bool transitable = true;
     private int cost = 1;
+    private bool manualReset = false;
 
-
-    private MeshRenderer rend;
+    internal Renderer rend;
     private Text costText;
     private Collider2D coll;
 
@@ -39,7 +41,8 @@ public class Cell : MonoBehaviour
         set
         {
             SetColor(value ? defaultColor : untransitableColor);
-            costText.gameObject.SetActive(value);
+            if (costText != null && costText.gameObject != null)
+                costText.gameObject.SetActive(value);
             gameObject.layer = value ? transitableLayer : blockedLayer;
             transitable = value;
         }
@@ -55,13 +58,14 @@ public class Cell : MonoBehaviour
         set
         {
             cost = value;
-            costText.text = cost.ToString();
+            if (costText != null)
+                costText.text = cost.ToString();
         }
     }
 
     private void Awake()
     {
-        rend = GetComponentInChildren<MeshRenderer>();
+        rend = GetComponentInChildren<Renderer>();
         costText = GetComponentInChildren<Text>();
         coll = GetComponent<Collider2D>();
     }
@@ -77,7 +81,6 @@ public class Cell : MonoBehaviour
         RaycastHit hit;
         Vector3 pos = transform.localPosition + Vector3.up * 10;
         Vector3 dir = (transform.localPosition - Vector3.up * 50) - transform.localPosition;
-        Debug.DrawRay(pos, dir, Color.green, 3, false);
         if (Physics.Raycast(pos, dir, out hit, Mathf.Infinity, floorLayer, QueryTriggerInteraction.Collide))
         {
             transform.position = hit.point + (Vector3.up * floorOffset);
@@ -86,20 +89,36 @@ public class Cell : MonoBehaviour
 
     public void Reset()
     {
+        if (manualReset == false)
+        {
+            Cost = 1;
+            Transitable = DefineTransitable();
+            SetColor(Transitable ? defaultColor : untransitableColor);
+        }
+    }
+
+    public void ManualReset()
+    {
         Cost = 1;
         Transitable = DefineTransitable();
         SetColor(Transitable ? defaultColor : untransitableColor);
+        manualReset = true;
     }
 
     private bool DefineTransitable()
     {
-        var hitResult = Physics.CheckSphere(transform.position, 1f, blockMask);
+        var hitResult = Physics.CheckSphere(transform.position, 0.5f, blockMask);
         return !hitResult;
     }
 
     public void SetColor(Color color)
     {
-        rend.material.color = color;
+        if (rend != null)
+        {
+            var tempMaterial = new Material(rend.sharedMaterial);
+            tempMaterial.color = color;
+            rend.sharedMaterial = tempMaterial;
+        }
     }
 
     public void ShowText(bool on)

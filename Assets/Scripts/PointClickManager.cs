@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PointClickManager : MonoBehaviour
@@ -12,11 +11,67 @@ public class PointClickManager : MonoBehaviour
     public float distanceToNextNode;
     public float searchNodeRadius;
     public LayerMask cellsMask;
-
+    private Vector3 point;
+    public float timeToSetPath;
+    private float timerPath;
 
     void Update()
     {
         CheckClicks();
+        timerPath += Time.deltaTime;
+        if (timerPath >= timeToSetPath && character.onMove)
+        {
+            if (gridSearcher.path[currentIndex] != null && gridSearcher.path[currentIndex++] != null && Physics.Raycast(character.transform.position, 
+                                                                                                                        gridSearcher.path[currentIndex].transform.position, 
+                                                                                                                        Vector3.Distance(character.transform.position, 
+                                                                                                                        gridSearcher.path[currentIndex].transform.position), 
+                                                                                                                        gridSearcher.blockedMask))
+            {
+                CalculatePath();
+            }
+        }
+    }
+
+    private void CalculatePath()
+    {
+        timerPath = 0f;
+
+        bool checkCells = Physics.CheckSphere(character.transform.position, searchNodeRadius, cellsMask);
+        Collider[] startingCells = Physics.OverlapSphere(character.transform.position, searchNodeRadius, cellsMask);
+        if (startingCells.Length == 0)
+            return;
+
+        gridSearcher.start = this.GetNearestCell(startingCells, character.transform.position);
+        gridSearcher.start.SetColor(gridSearcher.startColor);
+
+        if (gridSearcher.start == null)
+            return;
+
+        Collider[] endingCells = Physics.OverlapSphere(point, searchNodeRadius, cellsMask);
+        if (endingCells.Length == 0)
+            return;
+
+        gridSearcher.end = this.GetNearestCell(endingCells, point);
+        gridSearcher.end.SetColor(gridSearcher.endColor);
+
+        if (gridSearcher.end == null)
+            return;
+
+        gridSearcher.ClearAll();
+        if (gridSearcher.end && gridSearcher.start)
+            gridSearcher.Search();
+
+        if (gridSearcher.path[1] != null && gridSearcher.start != null && Physics.Raycast(character.transform.position, gridSearcher.start.transform.position, Mathf.Infinity, gridSearcher.blockedMask))
+        {
+            currentIndex = 1;
+        }
+        else
+        {
+            currentIndex = 0;
+        }
+        currentCell = gridSearcher.path[currentIndex];
+        character.SetPoint(currentCell.transform.position);
+
     }
 
     private void CheckClicks()
@@ -26,7 +81,7 @@ public class PointClickManager : MonoBehaviour
             Clicked();
         }
 
-        if(gridSearcher.path.Count > 0)
+        if (gridSearcher.path.Count > 0)
         {
             SetPathToCharacter();
         }
@@ -34,7 +89,7 @@ public class PointClickManager : MonoBehaviour
 
     private void SetPathToCharacter()
     {
-        if(Vector3.Distance(character.transform.position, currentCell.transform.position) < distanceToNextNode)
+        if (Vector3.Distance(character.transform.position, currentCell.transform.position) < distanceToNextNode)
         {
             if (currentCell != gridSearcher.end)
             {
@@ -52,29 +107,8 @@ public class PointClickManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            bool checkCells = Physics.CheckSphere(character.transform.position, searchNodeRadius, cellsMask);
-            Collider[] startingCells = Physics.OverlapSphere(character.transform.position, searchNodeRadius, cellsMask);
-            if (startingCells.Length == 0)
-                return;
-
-            gridSearcher.start = this.GetNearestCell(startingCells, character.transform.position);
-            gridSearcher.start.SetColor(gridSearcher.startColor);
-
-
-            Collider[] endingCells = Physics.OverlapSphere(hit.point, searchNodeRadius, cellsMask);
-            if (endingCells.Length == 0)
-                return;
-
-            gridSearcher.end = this.GetNearestCell(endingCells, hit.point);
-            gridSearcher.end.SetColor(gridSearcher.endColor);
-
-            gridSearcher.ClearAll();
-            if (gridSearcher.end && gridSearcher.start)
-                gridSearcher.Search();
-
-            currentIndex = 0;
-            currentCell = gridSearcher.path[currentIndex];
-            character.SetPoint(currentCell.transform.position);
+            this.point = hit.point;
+            CalculatePath();
         }
     }
 
@@ -88,21 +122,24 @@ public class PointClickManager : MonoBehaviour
             {
                 try
                 {
-                    if (item.GetComponent<Cell>() == null)
-                        continue;
-
-                    if (item.gameObject.GetComponent<Cell>().Transitable)
+                    if (item.GetComponent<Cell>() != null)
                     {
-                        cell = item.gameObject.GetComponent<Cell>();
-                        minDist = Vector3.Distance(item.transform.position, point);
+                        Cell tempCell = item.GetComponent<Cell>();
+
+                        if (tempCell.Transitable)
+                        {
+                            cell = tempCell;
+                            minDist = Vector3.Distance(item.transform.position, point);
+                        }
                     }
                 }
                 catch (Exception)
                 {
-                    print("Trying to take Cell component on a non cell object.");
+                    print("Trying to take Cell component on a non cell object." + item.gameObject.name);
                 }
             }
         }
         return cell;
     }
+
 }

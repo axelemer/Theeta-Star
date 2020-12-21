@@ -1,18 +1,46 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEditor;
 
-public class GridEditorWindow : MonoBehaviour
+public class GridEditorWindow : EditorWindow
 {
-    // Start is called before the first frame update
-    void Start()
+    [MenuItem("Window/Grid Creator")]
+    public static void ShowWindow()
     {
-        
+        EditorWindow.GetWindow<GridEditorWindow>("Grid Creator");
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnGUI()
     {
-        
+        if (GUILayout.Button("Create"))
+        {
+            var gridMaker = FindObjectOfType<GridMaker>();
+
+            if (gridMaker != null)
+            {
+                if (gridMaker.cells == null)
+                {
+                    //gridMaker.CreateGrid();
+                    //gridMaker.gridCreated = true;
+                }
+            }
+            else
+            {
+                Debug.Log("Grid maker not found.");
+            }
+        }
+        if (GUILayout.Button("Delete"))
+        {
+            var gridMaker = FindObjectOfType<GridMaker>();
+
+            if (gridMaker != null)
+            {
+                //if (gridMaker.cells != null)
+                //    gridMaker.DestroyGrid();
+            }
+            else
+            {
+                Debug.Log("Grid maker not found.");
+            }
+        }
     }
 }

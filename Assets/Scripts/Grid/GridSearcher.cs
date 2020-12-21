@@ -5,13 +5,10 @@ using UnityEngine;
 
 public class GridSearcher : MonoBehaviour
 {
-    public enum SearchType { BFS, DFS, Dijkstra, AStar, ThetaStar }
-    public SearchType searchType; //El tipo de busqueda que vamos a realizar
-
     public enum MovementType { Straight, StraightDiagonal }
     public MovementType movementType;
 
-    public GridMaker grid;//Referencia a la grilla
+    public GridMaker grid;
 
     public float heuristicMultiplier = 1f;
 
@@ -32,8 +29,8 @@ public class GridSearcher : MonoBehaviour
 
     public LayerMask blockedMask;
 
-    internal Cell start;//Nodo inicial
-    internal Cell end;//Nodo final
+    internal Cell start;
+    internal Cell end;
 
     private List<Vector2Int> straightDirs = new List<Vector2Int>();
     private List<Vector2Int> diagonalDirs = new List<Vector2Int>();
@@ -52,13 +49,11 @@ public class GridSearcher : MonoBehaviour
     //En start porque la grid se genera en un Awake.
     void Start()
     {
-        //Straight Directions
         straightDirs.Add(Vector2Int.right);
         straightDirs.Add(Vector2Int.down);
         straightDirs.Add(Vector2Int.left);
         straightDirs.Add(Vector2Int.up);
 
-        // Diagonal Directions
         diagonalDirs.Add(Vector2Int.right);
         diagonalDirs.Add(Vector2Int.right + Vector2Int.down);
         diagonalDirs.Add(Vector2Int.down);
@@ -68,27 +63,26 @@ public class GridSearcher : MonoBehaviour
         diagonalDirs.Add(Vector2Int.up);
         diagonalDirs.Add(Vector2Int.up + Vector2Int.right);
 
-        foreach (var cell in grid.cells)//A cada una de las celdas
+        foreach (var cell in grid.cells)
         {
-            cell.OnSelect += OnCellSelected;//Le decimos que hacer cuando las seleccionan
+            cell.OnSelect += OnCellSelected;
         }
     }
 
     private void OnCellSelected(Cell cell)
     {
-        //if (!cell.Transitable) return;//Si la celda esta bloqueada no hacemos nada
+        //if (!cell.Transitable) return;
 
-        //ClearAll();//Debug - limpia el color de todas las celdas
+        //ClearAll();
 
-        //start = end;//Nuestra celda inicial va a ser la que antes era la final
-        //end = cell;//Y la celda final va a ser la que estemos seleccionando ahora
+        //start = end;
+        //end = cell;
 
-        ////Debug - Le seteamos los colores correspondientes al inicio y al fin
         //if (start) start.SetColor(startColor);
         //if (end) end.SetColor(endColor);
 
-        //if (end && start)//Si ninguna de los dos es null
-        //    Search();//Ejecutamos la busqueda
+        //if (end && start)
+        //    Search();
     }
 
 
@@ -97,42 +91,19 @@ public class GridSearcher : MonoBehaviour
         if (start == null || end == null) return;
 
         ClearAll();
-        cellsChecked = new List<Cell>();//Debug - limpiamos la lista donde nuestro algoritmo va a agregar
-                                        //cada celda que vaya chequeando. Nos sirve para saber el orden de
-                                        //ejecucion.        
+        cellsChecked = new List<Cell>();//Debug
 
-        //Aca obtenemos el path
-        switch (searchType)
-        {
-            case SearchType.BFS:
-                path = BFS.Run(start, Satisfies, GetNeighbours);
-                break;
-            case SearchType.DFS:
-                path = DFS.Run(start, Satisfies, GetNeighbours);
-                break;
-            case SearchType.Dijkstra:
-                path = Dijkstra.Run(start, Satisfies, GetWightedNeighbours);
-                break;
-            case SearchType.AStar:
-                path = AStar.Run(start, Satisfies, GetWightedNeighbours, Heuristic);
-                break;
-            case SearchType.ThetaStar:
-                path = ThetaStar.Run(start, Satisfies, GetWightedNeighbours, Heuristic, InSight, EuclideanDist);
-                break;
-        }
+        path = ThetaStar.Run(start, Satisfies, GetWightedNeighbours, Heuristic, InSight, EuclideanDist);
 
-        //Aca ya tenemos el path propiamente dicho.
-        //Podriamos pasarselo a algun agente para que use la lista de nodos como waypoints para
-        //recorrerla, o lo que fuera.
 
-        //Debug - En nuestro caso vamos a pintar las celdas del path.
+        //Debug
         StartCoroutine(PaintRoutine());
     }
 
     private bool Satisfies(Cell cell)
     {
         cellsChecked.Add(cell);//Debug
-        return cell.Equals(end);//Es nuestra celda el final del camino?
+        return cell.Equals(end);
     }
 
     private List<Cell> GetNeighbours(Cell current)
@@ -203,12 +174,12 @@ public class GridSearcher : MonoBehaviour
     //Debug
     internal void ClearAll()
     {
-        StopAllCoroutines();//Detenemos la corrutina de pintado
+        StopAllCoroutines();
         lineRenderer.positionCount = 0;
         foreach (var cell in grid.cells)
         {
             if (cell.Transitable)
-                cell.SetColor(cell.defaultColor);//Las pintamos con el color por defecto
+                cell.SetColor(cell.defaultColor);
         }
     }
 
@@ -222,8 +193,7 @@ public class GridSearcher : MonoBehaviour
 
     private IEnumerator PaintRoutine()
     {
-
-        //Pintamos las celdas checkeadas
+        //Se pintan celdas chequeadas
         for (int i = 0; i < cellsChecked.Count; i++)
         {
             var current = cellsChecked[i];
@@ -234,7 +204,6 @@ public class GridSearcher : MonoBehaviour
         if (path != null)
         {
             var positions = new List<Vector3>();
-            //Pintamos el path
             for (int i = 0; i < path.Count; i++)
             {
                 var current = path[i];
@@ -247,7 +216,6 @@ public class GridSearcher : MonoBehaviour
         }
     }
 
-    //Funcion para mesclar una lista
     public List<T> Shuffle<T>(List<T> list)
     {
         int n = list.Count;
